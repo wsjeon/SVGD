@@ -22,6 +22,12 @@
                 - For BGAIL, this might be sufficient. 
     5. If the uniform prior is used, the scale factor in 4. may not be needed!
     
- ## 2018/08/18
+## 2018/08/18
  -  flat gradient and variables make implementation much simpler! 
  -  unflattened gradient and its assignment to original vars should be implemented later!
+
+## 2018/08/19
+-   SVGD with Bayesian classification
+    - NOTE: it should be gradient ascent
+    - I should plot the contour.
+-   Next, I'll try to implement default examples in SVGD.

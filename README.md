@@ -39,7 +39,7 @@
     This makes our proposal distribution converge to the target much faster.
 -   I find out interesting example.
 
-    ![](./results/predictive_svgd_20.png)
+    ![](./results/predictive_svgd_20.png | width=100)
     
     ![](./results/predictive_ensemble_20.png)
     

@@ -15,8 +15,7 @@ class SVGD(object):
     def build_optimizer(self):
         flatgrads_list, flatvars_list = [], []
 
-        for i in range(self.num_particles):
-            grads, vars = self.grads_list[i], self.vars_list[i]
+        for grads, vars in zip(self.grads_list, self.vars_list):
             flatgrads, flatvars = self.flatten_grads_and_vars(grads, vars)
             flatgrads_list.append(flatgrads)
             flatvars_list.append(flatvars)
@@ -100,3 +99,21 @@ class SVGD(object):
         assert all(isinstance(a, int) for a in out), \
             'shape function assumes that shape is fully known'
         return out
+
+
+class Ensemble(object):
+    def __init__(self, grads_list, vars_list, make_gradient_optimizer):
+        self.grads_list = grads_list
+        self.vars_list = vars_list
+        self.make_gradient_optimizer = make_gradient_optimizer
+        self.num_particles = len(vars_list)
+        self.update_op = self.build_optimizer()
+
+    def build_optimizer(self):
+        # optimizer
+        update_ops = []
+        for grads, vars in zip(self.grads_list, self.vars_list):
+            opt = self.make_gradient_optimizer()
+            # gradient ascent
+            update_ops.append(opt.apply_gradients([(-g, v) for g, v in zip(grads, vars)]))
+        return tf.group(*update_ops)

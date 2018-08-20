@@ -1,14 +1,15 @@
 import tensorflow as tf
 import numpy as np
 import time
-from optimizer import SVGD
+from optimizer import SVGD, Ensemble
 import matplotlib.pyplot as plt
 
 # hyperparams
 num0 = 200  # number of samples in class0 (<400)
-num_particles = 100  # number of ensembles (SVGD particles)
-num_iterations = 1000  # number of training iterations
+num_particles = 20  # number of ensembles (SVGD particles)
+num_iterations = 500  # number of training iterations
 seed = 0
+algorithm = 'ensemble' # 'svgd' or 'ensemble'
 
 # random seeds
 np.random.seed(seed)
@@ -16,10 +17,10 @@ tf.set_random_seed(seed)
 
 # data generation
 num1 = 400 - num0
-mean0 = np.array([-3, -3])
-std0 = np.array([0.5, 0.5])
-mean1 = np.array([3, 3])
-std1 = np.array([0.5, 0.5])
+mean0 = np.array([-1, -1])
+std0 = np.array([0.25, 0.25])
+mean1 = np.array([1, 1])
+std1 = np.array([1.5, 1.5])
 x0 = np.tile(mean0, (num0, 1)) + std0 * np.random.randn(num0, 2)
 x1 = np.tile(mean1, (num1, 1)) + std1 * np.random.randn(num1, 2)
 y0 = np.zeros((x0.shape[0], 1))
@@ -71,9 +72,16 @@ def make_gradient_optimizer():
     return tf.train.AdamOptimizer(learning_rate=0.001)
 
 
-optimizer = SVGD(grads_list=grads_list,
-                 vars_list=vars_list,
-                 make_gradient_optimizer=make_gradient_optimizer)
+if algorithm == 'svgd':
+    optimizer = SVGD(grads_list=grads_list,
+                     vars_list=vars_list,
+                     make_gradient_optimizer=make_gradient_optimizer)
+elif algorithm == 'ensemble':
+    optimizer = Ensemble(grads_list=grads_list,
+                         vars_list=vars_list,
+                         make_gradient_optimizer=make_gradient_optimizer)
+else:
+    raise NotImplementedError
 
 # marginalization using MC approximation
 prob_1_x = tf.reduce_mean(tf.stack(prob_1_x_w_list), axis=0)
@@ -112,7 +120,7 @@ with tf.Session() as sess:
     x1 = x_train[np.where(y_train[:, 0] == 1)]
     ax.scatter(x0[:, 0], x0[:, 1], s=1, c='blue', zorder=1)
     ax.scatter(x1[:, 0], x1[:, 1], s=1, c='red', zorder=2)
-    ax.set_title('Predictive distribution $p(1|(x_0, x_1))$')
+    ax.set_title('$p(1|(x_0, x_1))$ with {} ({} particles)'.format(algorithm, num_particles))
     ax.set_xlabel('$x_0$')
     ax.set_ylabel('$x_1$')
     ax.set_xlim(-5, 5)

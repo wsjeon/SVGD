@@ -1,7 +1,7 @@
 import tensorflow as tf
 import numpy as np
 import time
-from optimizer import SVGD
+from optimizer import SVGD, Ensemble
 import matplotlib.pyplot as plt
 from scipy.stats import gaussian_kde
 
@@ -11,6 +11,7 @@ num_particles = 100  # number of ensembles (SVGD particles)
 num_iterations = 1000  # number of training iterations
 learning_rate = 0.1
 seed = 0
+algorithm = 'ensemble' # 'svgd' or 'ensemble'
 
 # random seeds
 np.random.seed(seed)
@@ -46,9 +47,17 @@ def make_gradient_optimizer():
     return tf.train.AdamOptimizer(learning_rate=learning_rate)
 
 
-optimizer = SVGD(grads_list=grads_list,
-                 vars_list=vars_list,
-                 make_gradient_optimizer=make_gradient_optimizer)
+if algorithm == 'svgd':
+    optimizer = SVGD(grads_list=grads_list,
+                     vars_list=vars_list,
+                     make_gradient_optimizer=make_gradient_optimizer)
+elif algorithm == 'ensemble':
+    optimizer = Ensemble(grads_list=grads_list,
+                         vars_list=vars_list,
+                         make_gradient_optimizer=make_gradient_optimizer)
+else:
+    raise NotImplementedError
+
 xs = tf.trainable_variables()
 
 with tf.Session() as sess:

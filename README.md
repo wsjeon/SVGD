@@ -38,8 +38,9 @@
     Thus, I just choose AdamOptimizer and increase the learning rate. 
     This makes our proposal distribution converge to the target much faster.
 -   I find out interesting example.
-
-    ![](./results/predictive_svgd_20.png | width=100x)
+    <img width="200" height="100">
+    ![](./results/predictive_svgd_20.png)
+    </img>
     
     ![](./results/predictive_ensemble_20.png)
     

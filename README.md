@@ -31,3 +31,9 @@
     - NOTE: it should be gradient ascent
     - I should plot the contour.
 -   Next, I'll try to implement default examples in SVGD.
+
+## 2018/08/20
+-   SVGD for toy example works
+-   However, I can't find out proper setting of Adagrad optimizer in TensorFlow.
+    Thus, I just choose AdamOptimizer and increase the learning rate. 
+    This makes our proposal distribution converge to the target much faster.

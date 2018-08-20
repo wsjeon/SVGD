@@ -4,11 +4,10 @@ from tensorflow.contrib.distributions import percentile
 
 
 class SVGD(object):
-    def __init__(self, grads_list, vars_list, optimizer, learning_rate, median_heuristic=True):
+    def __init__(self, grads_list, vars_list, make_gradient_optimizer, median_heuristic=True):
         self.grads_list = grads_list
         self.vars_list = vars_list
-        self.optimizer = optimizer
-        self.learning_rate =learning_rate
+        self.make_gradient_optimizer = make_gradient_optimizer
         self.num_particles = len(vars_list)
         self.median_heuristic = median_heuristic
         self.update_op = self.build_optimizer()
@@ -72,7 +71,7 @@ class SVGD(object):
         # optimizer
         update_ops = []
         for grads, vars in zip(grads_list, self.vars_list):
-            opt = self.optimizer(learning_rate=self.learning_rate)
+            opt = self.make_gradient_optimizer()
             # gradient ascent
             update_ops.append(opt.apply_gradients([(-g, v) for g, v in zip(grads, vars)]))
         return tf.group(*update_ops)

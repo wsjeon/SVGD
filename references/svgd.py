@@ -9,8 +9,8 @@ class SVGD():
     def __init__(self):
         pass
 
-    @classmethod
-    def svgd_kernel(self, theta, h=-1):
+    @staticmethod
+    def svgd_kernel(theta, h=-1):
         # I modified two lines to compare with my code.
         # sq_dist = pdist(theta)
         # pairwise_dists = squareform(sq_dist) ** 2
@@ -34,11 +34,11 @@ class SVGD():
         if x0 is None or lnprob is None:
             raise ValueError('x0 or lnprob cannot be None!')
 
-        theta = np.copy(x0)
+        theta = np.copy(np.array(x0, dtype=np.float32))
 
         # adagrad with momentum
-        fudge_factor = 1e-6
-        historical_grad = 0
+        fudge_factor = np.array(1e-6, dtype=np.float32)
+        historical_grad = np.zeros((), dtype=np.float32)
         for iter in range(n_iter):
             if debug and (iter + 1) % 1000 == 0:
                 print
@@ -49,12 +49,13 @@ class SVGD():
             kxy, dxkxy = self.svgd_kernel(theta, h=-1)
             grad_theta = (np.matmul(kxy, lnpgrad) + dxkxy) / x0.shape[0]
 
-            # adagrad
-            if iter == 0:
-                historical_grad = historical_grad + grad_theta ** 2
-            else:
-                historical_grad = alpha * historical_grad + (1 - alpha) * (grad_theta ** 2)
-            adj_grad = np.divide(grad_theta, fudge_factor + np.sqrt(historical_grad))
-            theta = theta + stepsize * adj_grad
+            # # adagrad
+            # if iter == 0:
+            #     historical_grad = historical_grad + grad_theta ** 2
+            # else:
+            #     historical_grad = alpha * historical_grad + (1 - alpha) * (grad_theta ** 2)
+            # adj_grad = np.divide(grad_theta, fudge_factor + np.sqrt(historical_grad))
+            # theta = theta + stepsize * adj_grad
+            theta += stepsize * grad_theta
 
         return theta

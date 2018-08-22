@@ -29,8 +29,6 @@ if __name__ == '__main__':
 
     with Time("Get initial particles"):
         initial_xs = np.array(np.random.normal(-10, 1, (100, 1)), dtype=np.float32)
-        print(initial_xs.sum())
-        print(np.linalg.norm(initial_xs))
     with Time("training & Get last particles"):
         final_xs = SVGD().update(initial_xs, model.dlnprob, n_iter=num_iterations, stepsize=0.1)
     initial_xs, final_xs = initial_xs.reshape(-1), final_xs.reshape(-1)

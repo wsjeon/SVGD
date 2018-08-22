@@ -3,8 +3,6 @@ import numpy as np
 import sys; sys.path.insert(0, '..')
 from references.svgd import SVGD as SVGD0
 from optimizer import SVGD as SVGD1
-import matplotlib.pyplot as plt
-from scipy.stats import gaussian_kde
 from utils import Time
 
 
@@ -17,7 +15,7 @@ if __name__ == '__main__':
     np.random.seed(seed)
 
     with Time("Get initial particles"):
-        initial_xs = np.array(np.random.normal(-10, 1, (300, 1)), dtype=np.float32)
+        initial_xs = np.array(np.random.normal(-10, 1, (300, 3)), dtype=np.float32)
     if len(initial_xs.shape) == 1:
         initial_xs = initial_xs.reshape(-1, 1)
     Kxy0, dxkxy0 = SVGD0.svgd_kernel(theta=initial_xs)

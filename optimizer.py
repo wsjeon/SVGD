@@ -12,8 +12,8 @@ class SVGD(object):
         self.median_heuristic = median_heuristic
         self.update_op = self.build_optimizer()
 
-    @classmethod
-    def svgd_kernel(self, flatvars_list, median_heuristic=True):
+    @staticmethod
+    def svgd_kernel(flatvars_list, median_heuristic=True):
         # For pairwise distance in a matrix form, I use the following reference:
         #       https://stackoverflow.com/questions/37009647
         #               /compute-pairwise-distance-in-a-batch-without-replicating-tensor-in-tensorflow
@@ -122,7 +122,7 @@ class Ensemble(object):
 class AdagradOptimizer(object):
     def __init__(self, learning_rate=1e-3, alpha=0.9, fudge_factor=1e-6):
         self.learning_rate = tf.constant(learning_rate)
-        self.alpha = tf.constant(alpha)
+        self.alpha = alpha
         self.fudge_factor = tf.constant(fudge_factor)
 
     def apply_gradients(self, gvs):
@@ -130,11 +130,14 @@ class AdagradOptimizer(object):
         for gv in gvs:
             g, v = gv
             historical_grad = tf.Variable(tf.zeros_like(g), trainable=False)
-            historical_grad_update_op = historical_grad.assign(self.alpha*historical_grad+(1.-self.alpha)*g**2)
+            alpha = tf.Variable(0.0, trainable=False)
+            historical_grad_update_op = historical_grad.assign(alpha*historical_grad+(1.-alpha)*g**2)
             with tf.control_dependencies([historical_grad_update_op]):
                 adj_grad = tf.div(g, self.fudge_factor + tf.sqrt(historical_grad))
                 v_update_op = v.assign(v - self.learning_rate * adj_grad)
-            v_update_ops.append(v_update_op)
+                with tf.control_dependencies([v_update_op]):
+                    alpha_update_op = alpha.assign(self.alpha)
+            v_update_ops.append(alpha_update_op)
 
         return tf.group(*v_update_ops)
 

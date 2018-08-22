@@ -7,8 +7,8 @@ from scipy.stats import gaussian_kde
 
 # hyper-parameters
 num_particles = 100  # number of ensembles (SVGD particles)
-num_iterations = 1000  # number of training iterations
-learning_rate = 0.01
+num_iterations = 2000  # number of training iterations
+learning_rate = 0.1
 seed = 0
 algorithm = 'svgd'  # 'svgd' or 'ensemble'
 
@@ -31,7 +31,9 @@ def network(scope):
 
 
 def make_gradient_optimizer():
-    return AdagradOptimizer(learning_rate=learning_rate)
+    # return AdagradOptimizer(learning_rate=learning_rate)
+    return tf.train.AdamOptimizer(learning_rate=learning_rate)
+    # return tf.train.GradientDescentOptimizer(learning_rate=learning_rate)
 
 
 with Time("graph construction"):

@@ -1,25 +1,23 @@
 import tensorflow as tf
 import numpy as np
 import time
-from optimizer import SVGD, Ensemble
+from optimizer import SVGD, Ensemble, AdagradOptimizer
 import matplotlib.pyplot as plt
 from scipy.stats import gaussian_kde
 
 
 # hyperparams
 num_particles = 100  # number of ensembles (SVGD particles)
-num_iterations = 1000  # number of training iterations
-learning_rate = 0.1
+num_iterations = 3000  # number of training iterations
+learning_rate = 0.01
 seed = 0
-algorithm = 'ensemble' # 'svgd' or 'ensemble'
+algorithm = 'svgd' # 'svgd' or 'ensemble'
 
 # random seeds
 np.random.seed(seed)
-tf.set_random_seed(seed)
 
 # initializer with q(x) distribution
-initializer = tf.random_normal_initializer(mean=-10, stddev=1)
-
+initial_xs = np.array(np.random.normal(-10, 1, (100, 1)), dtype=np.float32).reshape(-1)
 
 def network(scope):
 
@@ -27,7 +25,7 @@ def network(scope):
         return - (x - m) ** 2 / 2. / s ** 2 - tf.log(s) - 0.5 * tf.log(2. * np.pi)
 
     with tf.variable_scope(scope):
-        x = tf.get_variable('x', shape=(), dtype=tf.float32, initializer=initializer, trainable=True)
+        x = tf.Variable(initial_xs[eval(scope[1])])
         log_prob0, log_prob1 = log_normal(x, -2., 1.), log_normal(x, 2., 1.)
         # log of target distribution p(x)
         log_p = tf.reduce_logsumexp(tf.stack([log_prob0, log_prob1, log_prob1]), axis=0) - tf.log(3.)
@@ -44,7 +42,8 @@ for i in range(num_particles):
 
 
 def make_gradient_optimizer():
-    return tf.train.AdamOptimizer(learning_rate=learning_rate)
+    return AdagradOptimizer(learning_rate=learning_rate)
+    #return tf.train.AdamOptimizer(learning_rate=learning_rate)
 
 
 if algorithm == 'svgd':
@@ -77,11 +76,21 @@ with tf.Session() as sess:
     num_rows, num_cols = 1, 1
 
     ax = fig.add_subplot(num_rows, num_cols, 1)
-    initial_density = gaussian_kde(initial_xs)
-    final_density = gaussian_kde(final_xs)
     x_grid = np.linspace(-15, 15, 200)
+
+    initial_density = gaussian_kde(initial_xs, 0.5)
     ax.plot(x_grid, initial_density(x_grid), color='green', label='0th iteration')
+    ax.scatter(initial_xs, np.zeros_like(initial_xs), color='green')
+
+    final_density = gaussian_kde(final_xs, 0.5)
     ax.plot(x_grid, final_density(x_grid), color='red', label='{}th iteration'.format(num_iterations))
+    ax.scatter(final_xs, np.zeros_like(final_xs), color='red')
+
+    def log_normal(x, m, s):
+        return - (x - m) ** 2 / 2. / s ** 2 - np.log(s) - 0.5 * np.log(2. * np.pi)
+    target_density = np.exp(log_normal(x_grid, -2., 1.)) / 3 + np.exp(log_normal(x_grid, 2., 1.)) * 2 / 3
+    ax.plot(x_grid, target_density, 'r--')
+
     ax.set_xlim([-15, 15])
     ax.set_ylim([0, 0.4])
     ax.legend()

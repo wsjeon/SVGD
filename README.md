@@ -1,10 +1,15 @@
-# Tensorflow Implementation of SVGD
+# TensorFlow Implementation of Stein Variational Gradient Descent
 
-## Bayesian Classification Example
--   I think this is a good example to apply tensorflow.
--   Joint prob. is p(w)p(x)p(0|x,w)^(1-y)p(1|x,w)^y, where w is the parameter, (x, y) is data. 
--   Since we have D = {(x_i, y_i)}, our goal is to find most probable parameter w
-    by consider the posterior p(w|D).
+## Examples
+### Gaussian mixture
+-   In this problem, we want to match the target density by using the particles sampled from other distributions.
+
+-   The detailed setting is given here.
+
+### Bayesian Binary Classification Example
+ the model is assumed to follow
+    
+
 -   I consider the following derivation:
     1. p(w)p(D|w) = p(w)p(x^N, y^N|w)
     2. log p(w)p(D|w) 

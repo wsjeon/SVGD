@@ -1,3 +1,5 @@
+# Reference:
+# https://github.com/DartML/Stein-Variational-Gradient-Descent/svgd.py
 import numpy as np
 from scipy.spatial.distance import pdist, squareform
 

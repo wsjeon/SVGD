@@ -40,8 +40,8 @@ sess.run(optimizer.update_op, feed_dict={X: x, Y: y})
 ### 1D Gaussian mixture
 -   The goal of this problem is to match the target density p(x)
     (mixture of two Gaussians)
-    by using the particles sampled from other distributions q(x).
-    For details, I recommend you to see the experiment in the paper. 
+    by moving the particles initially sampled from other distributions q(x).
+    For details, I recommend you to see the experiment section in the authors' paper. 
     
 -   I got the following result:
 
@@ -49,14 +49,14 @@ sess.run(optimizer.update_op, feed_dict={X: x, Y: y})
       <img src="/results/1_gaussian_mixture/gmm_result.gif" width="400" />
     </p>
     
--   **NOTE THAT** I've compared authors' implementation in this example, 
-    and the results for our implementation and original one are the same.
+-   **NOTE THAT** I compared my implementation with that of authors
+    and checked the results are the same.
  
 
 ### Bayesian Binary Classification
 -   In this example, we want to classify binary data by using multiple neural classifier. 
-    I've checked how SVGD works differently from simple ensemble method.
-    I made a [pdf file](./derivations/bayesian_classification.pdf) for detailed mathematical derivations. 
+    I checked how SVGD differs from ensemble method in this example.
+    I made a [pdf file](./derivations/bayesian_classification.pdf) for detailed mathematical derivations.
 
 -   I got the following results:
 
@@ -65,5 +65,5 @@ sess.run(optimizer.update_op, feed_dict={X: x, Y: y})
       <img src="/results/2_bayesian_classification/predictive_svgd_20.png" width="350" />
     </p>
 
-    -   Therefore, ensemble methods make particles to *strongly* classify samples,
+    -   Thus, ensemble methods make particles to *strongly* classify samples,
         where as SVGD leads to draw the particles that characterize the posterior distribution.

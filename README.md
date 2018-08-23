@@ -61,8 +61,8 @@ sess.run(optimizer.update_op, feed_dict={X: x, Y: y})
 -   I got the following results:
 
     <p float="left">
-      <img src="/results/2_bayesian_classificaation/predictive_ensemble_20.png" width="100" />
-      <img src="/results/2_bayesian_classificaation/predictive_svgd_20.png" width="100" />
+      <img src="/results/2_bayesian_classification/predictive_ensemble_20.png" width="100" />
+      <img src="/results/2_bayesian_classification/predictive_svgd_20.png" width="100" />
     </p>
 
     -   Therefore, ensemble methods make particles to *strongly* classify samples,

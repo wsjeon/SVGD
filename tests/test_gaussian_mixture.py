@@ -48,7 +48,7 @@ if __name__ == '__main__':
     ax.scatter(initial_xs, np.zeros_like(initial_xs), color='green')
 
     final_density = gaussian_kde(final_xs)
-    ax.plot(x_grid, final_density(x_grid), color='red', label='{}th iteration'.format(num_iterations))
+    ax.plot(x_grid, final_density(x_grid), color='red', label='{}th iteration'.format(num_iterations), linewidth=5)
     ax.scatter(final_xs, np.zeros_like(final_xs), color='red')
 
     def log_normal(x, m, s):
@@ -87,11 +87,12 @@ if __name__ == '__main__':
         for i in range(num_particles):
             grads, vars = network('p{}'.format(i))
 
-            # grads replacement
-            new_grads = []
-            for g, v in zip(grads, vars):
-                new_grads.append(2 * tf.tanh(2 * v) - v)
-            grads_list.append(new_grads)
+#            # grads replacement
+#            new_grads = []
+#            for g, v in zip(grads, vars):
+#                new_grads.append(2 * tf.tanh(2 * v) - v)
+#            grads_list.append(new_grads)
+            grads_list.append(grads)
             vars_list.append(vars)
 
         if algorithm == 'svgd':

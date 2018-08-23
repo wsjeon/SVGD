@@ -43,8 +43,8 @@
     Thus, I just choose AdamOptimizer and increase the learning rate. 
     This makes our proposal distribution converge to the target much faster.
 
-![](./results/predictive_svgd_20.png)
-![](./results/predictive_ensemble_20.png)
+![](results/2_bayesian_classification/predictive_svgd_20.png)
+![](results/2_bayesian_classification/predictive_ensemble_20.png)
 -   I find out interesting example. 
     -   Thus, ensemble tries to strongly classify samples,
         whereas SVGD tries to draw the posterior.

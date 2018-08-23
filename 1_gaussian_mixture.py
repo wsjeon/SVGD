@@ -1,16 +1,16 @@
 import tensorflow as tf
 import numpy as np
 from optimizer import SVGD, Ensemble, AdagradOptimizer
-from utils import Time
+from utils import Time, tf_log_normal
 import matplotlib.pyplot as plt
 from scipy.stats import gaussian_kde
 
 # hyper-parameters
 num_particles = 100  # number of ensembles (SVGD particles)
 num_iterations = 2000  # number of training iterations
-learning_rate = 0.1
+learning_rate = 0.01
 seed = 0
-algorithm = 'svgd'  # 'svgd' or 'ensemble'
+algorithm = 'svgd'  # either 'svgd' or 'ensemble'
 
 # random seeds
 np.random.seed(seed)
@@ -18,10 +18,9 @@ tf.set_random_seed(seed)
 
 
 def network(scope):
-    def tf_log_normal(x, m, s):
-        return - (x - m) ** 2 / 2. / s ** 2 - tf.log(s) - 0.5 * tf.log(2. * np.pi)
+
     with tf.variable_scope(scope):
-        x = tf.get_variable('x', shape=(), dtype=tf.float32, initializer=initializer, trainable=True)
+        x = tf.Variable(initial_xs[eval(scope[1:])])
         log_prob0, log_prob1 = tf_log_normal(x, -2., 1.), tf_log_normal(x, 2., 1.)
         # log of target distribution p(x)
         log_p = tf.reduce_logsumexp(tf.stack([log_prob0, log_prob1, log_prob1]), axis=0) - tf.log(3.)
@@ -31,14 +30,11 @@ def network(scope):
 
 
 def make_gradient_optimizer():
-    # return AdagradOptimizer(learning_rate=learning_rate)
-    return tf.train.AdamOptimizer(learning_rate=learning_rate)
-    # return tf.train.GradientDescentOptimizer(learning_rate=learning_rate)
+    return AdagradOptimizer(learning_rate=learning_rate)
 
 
 with Time("graph construction"):
-    # initializer with q(x) distribution
-    initializer = tf.random_normal_initializer(mean=-10, stddev=1)
+    initial_xs = np.array(np.random.normal(-10, 1, (100,)), dtype=np.float32)
 
     grads_list, vars_list = [], []
     for i in range(num_particles):

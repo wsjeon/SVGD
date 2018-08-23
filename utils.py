@@ -1,4 +1,6 @@
 import time
+import tensorflow as tf
+import numpy as np
 
 
 class Colors(object):
@@ -64,8 +66,5 @@ class Time(object):
         print(color + string + Colors.CEND)
 
 
-if __name__ == '__main__':
-    with Time("test"):
-        a = 1 + 1
-
-
+def tf_log_normal(x, m, s):
+    return - (x - m) ** 2 / 2. / s ** 2 - tf.log(s) - 0.5 * tf.log(2. * np.pi)

@@ -56,7 +56,7 @@ sess.run(optimizer.update_op, feed_dict={X: x, Y: y})
 ### Bayesian Binary Classification
 -   In this example, we want to classify binary data by using multiple neural classifier. 
     I've checked how SVGD works differently from simple ensemble method.
-    I made a [pdf file](./bayesian_classification.pdf) for detailed mathematical derivations. 
+    I made a [pdf file](./derivations/bayesian_classification.pdf) for detailed mathematical derivations. 
 
 -   I got the following results:
 

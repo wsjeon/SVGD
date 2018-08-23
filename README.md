@@ -46,7 +46,7 @@ sess.run(optimizer.update_op, feed_dict={X: x, Y: y})
 -   I got the following result:
 
     <p float="left" align="center">
-      <img src="/results/1_gaussian_mixture/gmm_result.gif" width="250" />
+      <img src="/results/1_gaussian_mixture/gmm_result.gif" width="400" />
     </p>
     
 -   **NOTE THAT** I've compared authors' implementation in this example, 
@@ -60,9 +60,9 @@ sess.run(optimizer.update_op, feed_dict={X: x, Y: y})
 
 -   I got the following results:
 
-    <p float="left">
-      <img src="/results/2_bayesian_classification/predictive_ensemble_20.png" width="250" />
-      <img src="/results/2_bayesian_classification/predictive_svgd_20.png" width="250" />
+    <p float="left" align="center">
+      <img src="/results/2_bayesian_classification/predictive_ensemble_20.png" width="350" />
+      <img src="/results/2_bayesian_classification/predictive_svgd_20.png" width="350" />
     </p>
 
     -   Therefore, ensemble methods make particles to *strongly* classify samples,

@@ -1,51 +1,69 @@
-# TensorFlow Implementation of Stein Variational Gradient Descent
+# TensorFlow Implementation of Stein Variational Gradient Descent (SVGD)
+
+## References
+-   [Paper in NIPS 2016](https://arxiv.org/abs/1608.04471)
+-   [Authors' code](https://github.com/DartML/Stein-Variational-Gradient-Descent)
+-   Some TensorFlow utilities from [OpenAI Baselines](https://github.com/openai/baselines).
+
+## Usages
+1. Define network, and get gradients and variables, e.g.,
+```python
+def network():
+    '''
+    Define target density and return gradients and variables. 
+    '''
+    return gradients, variables
+```
+
+2. Define gradient descent optimizer, e.g.,
+```python
+def make_gradient_optimizer():
+    return tf.train.GradientDescentOptimizer(learning_rate=0.01)
+```
+
+3. Build multiple networks (particles) using `network()` and 
+    take all those gradients and variables in `grads_list` and `vars_list`.
+    
+4. Make SVGD optimizer, e.g., 
+```python
+optimizer = SVGD(grads_list, vars_list, make_gradient_optimizer)
+```
+
+5. In the training phase, `optimizer.update_op` will do single SVGD update, e.g.,
+```python
+sess = tf.Session()
+sess.run(optimizer.update_op, feed_dict={X: x, Y: y})
+```
+
 
 ## Examples
-### Gaussian mixture
--   In this problem, we want to match the target density by using the particles sampled from other distributions.
-
--   The detailed setting is given here.
-
-### Bayesian Binary Classification Example
- the model is assumed to follow
+### 1D Gaussian mixture
+-   The goal of this problem is to match the target density p(x)
+    (mixture of two Gaussians)
+    by using the particles sampled from other distributions q(x).
+    For details, I recommend you to see the experiment in the paper. 
     
+-   I got the following result:
 
--   I consider the following derivation:
-    1. p(w)p(D|w) = p(w)p(x^N, y^N|w)
-    2. log p(w)p(D|w) 
-       = log p(w) + \sum_i (log p(xi) + (1-yi) log p(0|xi,w) + yi log p(1|xi,w))
-        - We don't have to consider p(D), since we'll only consider gradient.
-        - Cross entropy!
-    3. The gradient over w also erase log p(xi)!
-        - This leads for us to consider:
-             - d log p(w) + \sum_i d {(1-yi) log p(0|xi,w) + yi log p(1|xi,w)}
-        - However, if data size is large, hard to calculate the latter one.
-    4. In SVGD paper, they subsample the data and scale it up.
-         - d log p(w) + (N/|\Omega|)\sum_{i\in\Omega}  
-            - The key is, (N/|\Omega|)
-            - This differs from my work BGAIL.
-                - For BGAIL, this might be sufficient. 
-    5. If the uniform prior is used, the scale factor in 4. may not be needed!
+    <p float="left" align="center">
+      <img src="/results/1_gaussian_mixture/gmm_result.gif" width="100" />
+    </p>
     
-## 2018/08/18
- -  flat gradient and variables make implementation much simpler! 
- -  unflattened gradient and its assignment to original vars should be implemented later!
+-   **NOTE THAT** I've compared authors' implementation in this example, 
+    and the results for our implementation and original one are the same.
+ 
 
-## 2018/08/19
--   SVGD with Bayesian classification
-    - NOTE: it should be gradient ascent
-    - I should plot the contour.
--   Next, I'll try to implement default examples in SVGD.
+### Bayesian Binary Classification
+-   In this example, we want to classify binary data by using multiple neural classifier. 
+    I've checked how SVGD works differently from simple ensemble method.
+    I made a [pdf file](./bayesian_classification.pdf) for detailed mathematical derivations. 
 
-## 2018/08/20
--   SVGD for toy example works
--   However, I can't find out proper setting of Adagrad optimizer in TensorFlow.
-    Thus, I just choose AdamOptimizer and increase the learning rate. 
-    This makes our proposal distribution converge to the target much faster.
+-   I got the following results:
 
-![](results/2_bayesian_classification/predictive_svgd_20.png)
-![](results/2_bayesian_classification/predictive_ensemble_20.png)
--   I find out interesting example. 
-    -   Thus, ensemble tries to strongly classify samples,
-        whereas SVGD tries to draw the posterior.
--   Also, I found that ensemble doens't work in Gaussian mixture example.
+    <p float="left">
+      <img src="/results/2_bayesian_classificaation/predictive_ensemble_20.png" width="100" />
+      <img src="/results/2_bayesian_classificaation/predictive_svgd_20.png" width="100" />
+    </p>
+
+    -   Therefore, ensemble methods make particles to *strongly* classify samples,
+        where as SVGD leads to draw the particles that characterize the posterior distribution.

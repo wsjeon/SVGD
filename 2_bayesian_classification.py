@@ -40,20 +40,15 @@ y_test = y[300:]
 
 def network(inputs, labels, scope):
     net = inputs
+    # See /derivations/bayesian_classification.pdf for mathematical details.
     with tf.variable_scope(scope):
         for _ in range(2):
             net = tf.layers.dense(net, 100, activation=tf.nn.tanh)
         logits = tf.layers.dense(net, 1)
-        # Based on the model assumption
-        #       p(w, D) := p(w) \prod_{i=1}^N p(x_i) p(0|x_i,w)^{1-y_i} p(1|x_i,w)^{y_i},
-        # the log likelihood is equal to the negative cross entropy up to unknown normalization constant.
-        # Note that p(1|x_i, w) is modeled by neural network in this problem.
         log_likelihood = - tf.nn.sigmoid_cross_entropy_with_logits(labels=labels, logits=logits)
         variables = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope=scope)
         prob_1_x_w = tf.nn.sigmoid(logits)
-        # uniform prior assumption
         gradients = tf.gradients(log_likelihood, variables)
-
     return gradients, variables, prob_1_x_w
 
 
@@ -82,7 +77,6 @@ with Time("graph construction"):
     else:
         raise NotImplementedError
 
-    # marginalization using MC approximation
     prob_1_x = tf.reduce_mean(tf.stack(prob_1_x_w_list), axis=0)
 
 with tf.Session() as sess:

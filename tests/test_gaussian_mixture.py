@@ -2,6 +2,7 @@ import tensorflow as tf
 import numpy as np
 from references.svgd import SVGD as SVGD0
 from optimizer import SVGD as SVGD1
+from optimizer import AdagradOptimizer
 import matplotlib.pyplot as plt
 from scipy.stats import gaussian_kde
 import sys; sys.path.insert(0, '..')
@@ -24,6 +25,7 @@ if __name__ == '__main__':
     learning_rate = 0.05
     seed = 0
     algorithm = 'svgd'
+    optimizer_option = 'adagrad'
 
     # random seeds
     np.random.seed(seed)
@@ -35,7 +37,7 @@ if __name__ == '__main__':
         initial_xs = np.array(np.random.normal(-10, 1, (100, 1)), dtype=np.float32)
         print(np.linalg.norm(initial_xs))
     with Time("training & Get last particles"):
-        final_xs = SVGD0().update(initial_xs, model.dlnprob, n_iter=num_iterations, stepsize=learning_rate)
+        final_xs = SVGD0().update(initial_xs, model.dlnprob, n_iter=num_iterations, stepsize=learning_rate, optimizer=optimizer_option)
     initial_xs, final_xs = initial_xs.reshape(-1), final_xs.reshape(-1)
 
     # plot
@@ -68,18 +70,21 @@ if __name__ == '__main__':
             x = tf.Variable(initial_xs[eval(scope[1:])])
             log_prob0, log_prob1 = tf_log_normal(x, -2., 1.), tf_log_normal(x, 2., 1.)
             # log of target distribution p(x)
-            # log_p = tf.reduce_logsumexp(tf.stack([log_prob0, log_prob1]), axis=0) - tf.log(2.)
-            l1, l2 = - (x + 2) ** 2 / 2, - (x - 2) ** 2 / 2
-            log_p = tf.reduce_logsumexp(tf.stack([l1, l2], axis=0)) - tf.log(np.sqrt(8.*np.pi, dtype=np.float32))
+            log_p = tf.reduce_logsumexp(tf.stack([log_prob0, log_prob1]), axis=0) - tf.log(2.)
+            # l1, l2 = - (x + 2) ** 2 / 2, - (x - 2) ** 2 / 2
+            # log_p = tf.reduce_logsumexp(tf.stack([l1, l2], axis=0)) - tf.log(np.sqrt(8.*np.pi, dtype=np.float32))
             variables = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope=scope)
             gradients = tf.gradients(log_p, variables)
         return gradients, variables
 
 
     def make_gradient_optimizer():
-        # return AdagradOptimizer(learning_rate=learning_rate)
-        # return tf.train.AdamOptimizer(learning_rate=learning_rate)
-        return tf.train.GradientDescentOptimizer(learning_rate=learning_rate)
+        if optimizer_option == 'adagrad':
+            return AdagradOptimizer(learning_rate=learning_rate)
+        elif optimizer_option == 'sgd':
+            return tf.train.GradientDescentOptimizer(learning_rate=learning_rate)
+        else:
+            raise NotImplementedError
 
 
     with Time("graph construction"):

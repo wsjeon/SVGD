@@ -26,7 +26,7 @@ class SVGD():
         dxkxy = np.divide(dxkxy, np.power(h, 2))
         return (Kxy, dxkxy)
 
-    def update(self, x0, lnprob, n_iter=1000, stepsize=1e-3, bandwidth=-1, alpha=0.9, debug=False):
+    def update(self, x0, lnprob, n_iter=1000, stepsize=1e-3, bandwidth=-1, alpha=0.9, debug=False, optimizer='adagrad'):
         # Check input
         if x0 is None or lnprob is None:
             raise ValueError('x0 or lnprob cannot be None!')
@@ -46,12 +46,17 @@ class SVGD():
             kxy, dxkxy = self.svgd_kernel(theta, h=-1)
             grad_theta = (np.matmul(kxy, lnpgrad) + dxkxy) / x0.shape[0]
 
-            # adagrad
-            if iter == 0:
-                historical_grad = historical_grad + grad_theta ** 2
+            if optimizer == 'adagrad':
+                # adagrad
+                if iter == 0:
+                    historical_grad = historical_grad + grad_theta ** 2
+                else:
+                    historical_grad = alpha * historical_grad + (1 - alpha) * (grad_theta ** 2)
+                adj_grad = np.divide(grad_theta, fudge_factor + np.sqrt(historical_grad))
+                theta = theta + stepsize * adj_grad
+            elif optimizer == 'sgd':
+                theta = theta + stepsize * grad_theta
             else:
-                historical_grad = alpha * historical_grad + (1 - alpha) * (grad_theta ** 2)
-            adj_grad = np.divide(grad_theta, fudge_factor + np.sqrt(historical_grad))
-            theta = theta + stepsize * adj_grad
+                raise NotImplementedError
 
         return theta

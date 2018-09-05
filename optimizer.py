@@ -64,7 +64,9 @@ class SVGD(object):
             for var in vars:
                 shape = self.var_shape(var)
                 size = int(np.prod(shape))
-                grads.append(tf.reshape(flatgrads[start:start + size], shape))
+                end = start + size
+                grads.append(tf.reshape(flatgrads[start:end], shape))
+                start = end
             grads_list.append(grads)
 
         # optimizer
